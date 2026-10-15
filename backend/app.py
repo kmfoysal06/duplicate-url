@@ -6,23 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
-# ZeroGPU compatibility for Hugging Face Spaces (satisfies startup check without requiring PRO subscription)
+# ZeroGPU compatibility for Hugging Face Spaces
 try:
     import spaces
+    import gradio as gr
+    HAS_ZEROGPU = True
 except ImportError:
-    class spaces:
-        @staticmethod
-        def GPU(func=None, *args, **kwargs):
-            if func is not None and callable(func):
-                return func
-            def decorator(f):
-                return f
-            return decorator
-
-@spaces.GPU
-def _hf_zerogpu_startup():
-    """Satisfies Hugging Face ZeroGPU startup validator."""
-    return True
+    HAS_ZEROGPU = False
 
 from job_manager import JobManager
 from test_server import test_app
@@ -45,10 +35,25 @@ app.add_middleware(
 # Mount the mock test server under /test-pages for convenient testing
 app.mount("/test-pages", test_app)
 
-@app.get("/", include_in_schema=False)
-def root():
-    """Redirect root path to interactive OpenAPI docs for Hugging Face Spaces"""
-    return RedirectResponse(url="/docs")
+if HAS_ZEROGPU:
+    @spaces.GPU(duration=60)
+    def _hf_gpu_ping(status_msg: str):
+        return f"SEO Duplicate Detector Backend is Active: {status_msg}"
+
+    with gr.Blocks(title="SEO Duplicate URL Detector") as _hf_demo:
+        gr.Markdown("### 🚀 SEO Duplicate-Page Detection Backend API is Running!")
+        gr.Markdown("Interactive Swagger API Documentation: [Open /docs](/docs)")
+        _txt_in = gr.Textbox(label="Status Ping", value="ready")
+        _txt_out = gr.Textbox(label="Backend Response")
+        _btn = gr.Button("Test Backend Connection")
+        _btn.click(fn=_hf_gpu_ping, inputs=_txt_in, outputs=_txt_out)
+
+    app = gr.mount_gradio_app(app, _hf_demo, path="/")
+else:
+    @app.get("/", include_in_schema=False)
+    def root():
+        """Redirect root path to interactive OpenAPI docs"""
+        return RedirectResponse(url="/docs")
 
 job_manager = JobManager()
 
