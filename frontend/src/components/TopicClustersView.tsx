@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { TopicClustersResult, TopicCluster, TopicClusterPage } from "@/types/seo";
-import { SearchIcon, ExternalLinkIcon, DownloadIcon, SparklesIcon, LayersIcon, AlertTriangleIcon, CheckCircleIcon } from "./Icons";
+import { TopicClustersResult, TopicClusterPage } from "@/types/seo";
+import { SearchIcon, DownloadIcon, SparklesIcon, LayersIcon, AlertTriangleIcon } from "./Icons";
 
 interface TopicClustersViewProps {
   topicData?: TopicClustersResult;
@@ -15,7 +15,7 @@ export default function TopicClustersView({ topicData, jobId, apiBase }: TopicCl
   const [showMultiOnly, setShowMultiOnly] = useState<boolean>(true);
   const [expandedCluster, setExpandedCluster] = useState<string | null>(null);
 
-  const clusters = topicData?.clusters || [];
+  const clusters = useMemo(() => topicData?.clusters || [], [topicData?.clusters]);
   const summary = topicData?.summary;
 
   const filteredClusters = useMemo(() => {

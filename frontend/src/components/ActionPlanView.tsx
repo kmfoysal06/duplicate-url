@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { ConsolidationPlan, ConsolidationAction } from "@/types/seo";
-import { SearchIcon, ExternalLinkIcon, DownloadIcon, CheckCircleIcon, AlertTriangleIcon } from "./Icons";
+import { ConsolidationPlan } from "@/types/seo";
+import { SearchIcon, DownloadIcon, CheckCircleIcon } from "./Icons";
 
 interface ActionPlanViewProps {
   plan?: ConsolidationPlan;
@@ -17,7 +17,7 @@ export default function ActionPlanView({ plan, jobId, apiBase }: ActionPlanViewP
   const [showConfigModal, setShowConfigModal] = useState<boolean>(false);
   const [activeConfigTab, setActiveConfigTab] = useState<"apache" | "nginx" | "cloudflare">("apache");
 
-  const actions = plan?.actions || [];
+  const actions = useMemo(() => plan?.actions || [], [plan?.actions]);
   const summary = plan?.summary;
 
   const filteredActions = useMemo(() => {
@@ -351,14 +351,14 @@ export default function ActionPlanView({ plan, jobId, apiBase }: ActionPlanViewP
 
             {/* Modal Tabs */}
             <div className="flex gap-2 px-6 pt-3 border-b border-zinc-200 dark:border-zinc-800">
-              {[
+              {([
                 { id: "apache", label: "Apache (.htaccess)" },
                 { id: "nginx", label: "Nginx rewrite" },
                 { id: "cloudflare", label: "Cloudflare Bulk CSV" },
-              ].map((tab) => (
+              ] as const).map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveConfigTab(tab.id as any)}
+                  onClick={() => setActiveConfigTab(tab.id)}
                   className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition ${
                     activeConfigTab === tab.id
                       ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
