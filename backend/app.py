@@ -3,7 +3,7 @@ import csv
 from typing import List, Optional
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, JSONResponse
+from fastapi.responses import Response, JSONResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
 from job_manager import JobManager
@@ -26,6 +26,11 @@ app.add_middleware(
 
 # Mount the mock test server under /test-pages for convenient testing
 app.mount("/test-pages", test_app)
+
+@app.get("/", include_in_schema=False)
+def root():
+    """Redirect root path to interactive OpenAPI docs for Hugging Face Spaces"""
+    return RedirectResponse(url="/docs")
 
 job_manager = JobManager()
 
@@ -380,3 +385,11 @@ def export_topic_clusters_csv(job_id: str):
             "Content-Disposition": f"attachment; filename=seo_topic_clusters_{job_id[:8]}.csv"
         }
     )
+
+if __name__ == "__main__":
+    import os
+    import uvicorn
+    # Hugging Face Spaces routes traffic to port 7860 by default
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
+
