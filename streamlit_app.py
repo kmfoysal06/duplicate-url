@@ -62,6 +62,12 @@ with st.sidebar:
         value=True,
         help="Automatically fetch, cache, and respect robots.txt crawl rules."
     )
+
+    allow_local_for_testing = st.checkbox(
+        "Allow localhost/private URLs (dev only)",
+        value=False,
+        help="Enable only for local testing. Keep disabled for hosted/production use."
+    )
     
     st.markdown("---")
     st.subheader("🎯 Target Topics / Keywords")
@@ -180,7 +186,7 @@ if start_btn and len(unique_urls) > 0:
         status_text.markdown("**Stage 1/4: Initializing polite crawler & SSRF shield...**")
         crawler = WebCrawler(
             respect_robots=respect_robots,
-            allow_local_for_testing=True
+            allow_local_for_testing=allow_local_for_testing
         )
         crawled_pages = crawler.crawl_urls(unique_urls, progress_callback=on_crawl_progress)
 

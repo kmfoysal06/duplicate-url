@@ -15,7 +15,7 @@ import DiffModal from "@/components/DiffModal";
 import ActionPlanView from "@/components/ActionPlanView";
 import TopicClustersView from "@/components/TopicClustersView";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
 export default function Dashboard() {
   const [urlsText, setUrlsText] = useState<string>("");
@@ -57,7 +57,9 @@ export default function Dashboard() {
       }
       setErrorMsg(null);
     } catch {
-      setErrorMsg("Failed to load test suite URLs. Please ensure the Python backend is running on port 8000.");
+      setErrorMsg(
+        "Failed to load test suite URLs. Ensure the backend is reachable or set NEXT_PUBLIC_API_URL for your deployment."
+      );
     }
   };
 
